@@ -361,6 +361,7 @@ function figKey(fig) {
   return [chap, parseFloat(rest) || 0];
 }
 function renderOne(ch) {
+    if (ch.type === "figure") return;          // an image card has no chart to draw
     if (ch.type === "stacked_bar") stackedBar({ id: ch.second ? ch.id + "-a" : ch.id }, null, ch);
     else if (ch.type === "stacked_bar_line") stackWithLine({ id: ch.id }, ch);
     else if (ch.type === "combo") combo({ id: ch.id }, ch);
