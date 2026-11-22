@@ -72,7 +72,8 @@ h1{margin:0;font-size:clamp(20px,2.1vw,26px);font-weight:650}
   color:var(--muted);margin:0 0 6px;font-variant-numeric:tabular-nums}
 .card h3{margin:0;font-size:15px;font-weight:600;letter-spacing:-.1px;line-height:1.3}
 .card p.sub{margin:5px 0 12px;font-size:12.5px;color:var(--muted);line-height:1.45}
-.card .cmeta{margin-top:12px;padding-top:9px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;
+.card .badge{margin-left:auto;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:2px 8px}
+.card .cmeta{display:flex;align-items:center;gap:10px;margin-top:12px;padding-top:9px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;
   gap:3px 14px;font-size:10.5px;color:var(--muted);letter-spacing:.03em;text-transform:uppercase}
 .card .cmeta b{font-weight:500;color:var(--ink);opacity:.75}
 .card .plot{width:100%;height:300px}
@@ -353,7 +354,7 @@ function scatter(c, opt) {
   });
 }
 /* ---------- build ---------- */
-const CHAP = (D.meta && D.meta.chapters) || {};
+const CHAP = Object.assign({ data: "Free dataset · world, all scenarios" }, (D.meta && D.meta.chapters) || {});
 function figKey(fig) {
   const s = String(fig || "");
   const chap = parseInt(s.split(".")[0], 10) || 0;
@@ -380,8 +381,9 @@ function draw() {
   CHARTS = [];
   const host = $("#charts");
   // report order: chapter, then figure number, then insertion order for sub-cards
-  const LIST = D.charts
-    .map((ch, i) => ({ ch, i, k: figKey(ch.fig) }))
+  const DATA_CARDS = (D.datasetCharts || []).map(c => Object.assign({}, c, { chapter: "data" }));
+  const LIST = D.charts.concat(DATA_CARDS)
+    .map((ch, i) => ({ ch, i, k: ch.chapter === "data" ? [9, i, 0] : figKey(ch.fig) }))
     .sort((a, b) => (a.k[0] - b.k[0]) || (a.k[1] - b.k[1]) || (a.i - b.i))
     .map(x => x.ch);
   if (!host.dataset.built) {
@@ -415,7 +417,7 @@ function draw() {
         ${img || duo}
         ${ch.note ? `<p class="note">${ch.note}</p>` : ""}
         ${ch.method ? `<p class="method">${ch.method}</p>` : ""}
-        <footer class="cmeta"><span>Source <b>IRENA WETO 2026</b></span></footer>
+        <footer class="cmeta"><span>Source <b>IEA WEO 2026</b></span><span class="badge">${ch.src || ""}</span></footer>
       </article>`;
     }).join("");
   }
