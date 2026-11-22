@@ -143,7 +143,7 @@ h1{margin:0;font-size:clamp(20px,2.1vw,26px);font-weight:650}
 </div>
 
 <script src="vendor/echarts.min.js"></script>
-<script src="data.js?v=5"></script>
+<script src="data.js?v=6"></script>
 <script>
 const D = window.WETO;
 const $ = s => document.querySelector(s);
@@ -372,6 +372,7 @@ function renderOne(ch) {
       groupedBar({ id: ch.id + "-a" }, Object.assign({}, ch, { unit: "TW", categories: ch.categories }));
       groupedBar({ id: ch.id + "-b" }, { categories: ch.categories, series: ch.second.series, unit: "PWh" });
     }
+    else if (ch.type === "figure") return;      // an image card has no plot to draw
     else groupedBar({ id: ch.id }, ch);
 }
 function draw() {
@@ -414,12 +415,16 @@ function draw() {
         ${img || duo}
         ${ch.note ? `<p class="note">${ch.note}</p>` : ""}
         ${ch.method ? `<p class="method">${ch.method}</p>` : ""}
-        <footer class="cmeta"><span>Source <b>IRENA WETO 2026</b></span></footer>
+        <footer class="cmeta"><span>Source <b>IEA World Energy Outlook 2026</b></span></footer>
       </article>`;
     }).join("");
   }
   /* render synchronously: headless browsers throttle requestAnimationFrame */
-  LIST.forEach(renderOne);
+  // one bad card must never blank the rest of the page
+  LIST.forEach(ch => {
+    try { renderOne(ch); }
+    catch (e) { (window.__drawErr = window.__drawErr || []).push(ch.fig + ": " + e.message); }
+  });
   setTimeout(resize, 60);
 }
 function reveal() {
