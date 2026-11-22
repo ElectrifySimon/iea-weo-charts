@@ -419,8 +419,14 @@ function draw() {
     }).join("");
   }
   /* render synchronously: headless browsers throttle requestAnimationFrame */
-  LIST.forEach(renderOne);
+  LIST.forEach(ch => { try { renderOne(ch); } catch (e) { (window.__rerr = window.__rerr || []).push(ch.fig + ": " + e.message); } });
   setTimeout(resize, 60);
+  // a chart can miss its first init if the card was not laid out yet: retry once
+  setTimeout(() => LIST.forEach(ch => {
+    if (ch.type === "figure") return;
+    const el = document.getElementById(ch.id);
+    if (el && !el.querySelector("canvas")) { try { renderOne(ch); } catch (e) {} }
+  }), 400);
 }
 function reveal() {
   const cards = [...document.querySelectorAll(".card")];
